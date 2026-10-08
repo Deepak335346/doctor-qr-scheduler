@@ -1,0 +1,245 @@
+{
+  "doctor": {
+    "id": "dr-sarah-jenkins",
+    "name": "Dr. Sarah Jenkins",
+    "qualifications": "MBBS, MD (Internal Medicine) - Reg No: KMC-74291",
+    "specialty": "Senior Consultant Physician & Family Medicine",
+    "experience": "12+ Years Clinical Experience",
+    "clinicName": "Aura Health & Care Multi-Specialty Clinic",
+    "chamber": "Chamber #204 (2nd Floor)",
+    "address": "402 100ft Road, Indiranagar, Bengaluru, Karnataka 560038",
+    "phone": "+91 98451 20400",
+    "email": "dr.jenkins@aurahealth.in",
+    "consultationFee": "₹500 / Consultation",
+    "avatar": "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&q=80&w=350",
+    "bio": "Specializing in family preventive care, acute illness diagnostics, diabetes & hypertension management, and annual health screenings.",
+    "clinicHoursNote": "Walk-ins & QR Bookings welcomed. Emergency triage available at Ground Floor ER."
+  },
+  "scheduleConfig": {
+    "slotDuration": 15,
+    "maxPatientsPerSlot": 1,
+    "days": {
+      "Monday": {
+        "enabled": true,
+        "shifts": [
+          {
+            "start": "09:00",
+            "end": "13:00"
+          },
+          {
+            "start": "16:00",
+            "end": "20:00"
+          }
+        ]
+      },
+      "Tuesday": {
+        "enabled": true,
+        "shifts": [
+          {
+            "start": "09:00",
+            "end": "13:00"
+          },
+          {
+            "start": "16:00",
+            "end": "20:00"
+          }
+        ]
+      },
+      "Wednesday": {
+        "enabled": true,
+        "shifts": [
+          {
+            "start": "09:00",
+            "end": "13:00"
+          },
+          {
+            "start": "16:00",
+            "end": "20:00"
+          }
+        ]
+      },
+      "Thursday": {
+        "enabled": true,
+        "shifts": [
+          {
+            "start": "09:00",
+            "end": "13:00"
+          },
+          {
+            "start": "16:00",
+            "end": "20:00"
+          }
+        ]
+      },
+      "Friday": {
+        "enabled": true,
+        "shifts": [
+          {
+            "start": "09:00",
+            "end": "13:00"
+          },
+          {
+            "start": "16:00",
+            "end": "20:00"
+          }
+        ]
+      },
+      "Saturday": {
+        "enabled": true,
+        "shifts": [
+          {
+            "start": "09:30",
+            "end": "14:30"
+          }
+        ]
+      },
+      "Sunday": {
+        "enabled": false,
+        "shifts": []
+      }
+    }
+  },
+  "overrides": [
+    {
+      "id": "ov-1",
+      "date": "2026-10-09",
+      "type": "blocked_day",
+      "reason": "Attending National Internal Medicine Summit"
+    },
+    {
+      "id": "ov-2",
+      "date": "2026-10-07",
+      "time": "11:20 AM",
+      "type": "blocked_slot",
+      "reason": "Reserved for Hospital Inpatient Rounds"
+    }
+  ],
+  "appointments": [
+    {
+      "id": "APT-8150",
+      "tokenNumber": 1,
+      "doctorId": "dr-sarah-jenkins",
+      "patientName": "Vikram Aditya",
+      "patientPhone": "+91 98765 43210",
+      "rawPhone10": "9876543210",
+      "patientEmail": "vikram.aditya@example.in",
+      "age": 34,
+      "gender": "Male",
+      "reason": "General Health Consultation",
+      "visitType": "First Visit",
+      "date": "2026-10-09",
+      "timeSlot": "09:00 AM",
+      "status": "booked",
+      "doctorNotes": "",
+      "createdAt": "2026-10-08T13:12:46.259Z"
+    },
+    {
+      "id": "APT-6956",
+      "tokenNumber": 5,
+      "doctorId": "dr-sarah-jenkins",
+      "patientName": "Test Patient",
+      "patientPhone": "+1 555-987-6543",
+      "patientEmail": "test@example.com",
+      "age": 30,
+      "gender": "Female",
+      "reason": "Test checkup",
+      "visitType": "First Visit",
+      "date": "2026-10-07",
+      "timeSlot": "11:40 AM",
+      "status": "cancelled",
+      "doctorNotes": "",
+      "createdAt": "2026-10-07T06:37:29.075Z"
+    },
+    {
+      "id": "APT-8821",
+      "tokenNumber": 1,
+      "doctorId": "dr-sarah-jenkins",
+      "patientName": "Michael Chang",
+      "patientPhone": "+1 (555) 723-8891",
+      "patientEmail": "m.chang@example.com",
+      "age": 38,
+      "gender": "Male",
+      "reason": "Persistent dry cough, mild throat irritation for 4 days",
+      "visitType": "First Visit",
+      "date": "2026-10-07",
+      "timeSlot": "09:20 AM",
+      "status": "completed",
+      "doctorNotes": "Prescribed antihistamines and throat lozenges. Advised hydration.",
+      "createdAt": "2026-10-06T18:30:00.000Z"
+    },
+    {
+      "id": "APT-8822",
+      "tokenNumber": 2,
+      "doctorId": "dr-sarah-jenkins",
+      "patientName": "Emma Watson",
+      "patientPhone": "+1 (555) 341-9988",
+      "patientEmail": "emma.w@example.com",
+      "age": 29,
+      "gender": "Female",
+      "reason": "Routine quarterly blood sugar & pressure checkup",
+      "visitType": "Follow-up",
+      "date": "2026-10-07",
+      "timeSlot": "10:00 AM",
+      "status": "cancelled",
+      "doctorNotes": "BP: 118/76. Fasting glucose normal.",
+      "createdAt": "2026-10-07T08:15:00.000Z"
+    },
+    {
+      "id": "APT-8823",
+      "tokenNumber": 3,
+      "doctorId": "dr-sarah-jenkins",
+      "patientName": "David Miller",
+      "patientPhone": "+1 (555) 654-3210",
+      "patientEmail": "dmiller99@example.com",
+      "age": 52,
+      "gender": "Male",
+      "reason": "Lower back strain after lifting heavy boxes",
+      "visitType": "First Visit",
+      "date": "2026-10-07",
+      "timeSlot": "10:40 AM",
+      "status": "cancelled",
+      "doctorNotes": "",
+      "createdAt": "2026-10-07T09:00:00.000Z"
+    },
+    {
+      "id": "APT-8824",
+      "tokenNumber": 4,
+      "doctorId": "dr-sarah-jenkins",
+      "patientName": "Sophia Rodriguez",
+      "patientPhone": "+1 (555) 890-1234",
+      "patientEmail": "sophia.r@example.com",
+      "age": 41,
+      "gender": "Female",
+      "reason": "Seasonal allergy flare-up and headache",
+      "visitType": "Follow-up",
+      "date": "2026-10-07",
+      "timeSlot": "04:20 PM",
+      "status": "cancelled",
+      "doctorNotes": "",
+      "createdAt": "2026-10-07T09:45:00.000Z"
+    },
+    {
+      "id": "APT-8825",
+      "tokenNumber": 1,
+      "doctorId": "dr-sarah-jenkins",
+      "patientName": "Robert Green",
+      "patientPhone": "+1 (555) 432-8765",
+      "patientEmail": "rgreen@example.com",
+      "age": 63,
+      "gender": "Male",
+      "reason": "Cardiovascular health follow-up & medication renewal",
+      "visitType": "Follow-up",
+      "date": "2026-10-08",
+      "timeSlot": "09:40 AM",
+      "status": "booked",
+      "doctorNotes": "",
+      "createdAt": "2026-10-07T10:00:00.000Z"
+    }
+  ],
+  "credentials": {
+    "username": "doctor",
+    "password": "Doctor@2026",
+    "pin": "782104",
+    "updatedAt": "2026-10-08T13:53:48.364Z"
+  }
+}
