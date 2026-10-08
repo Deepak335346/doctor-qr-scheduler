@@ -156,10 +156,10 @@ export default function MyBookingsPage({ doctor, onBackToBooking }) {
                 type="tel"
                 required
                 value={phone}
-                onChange={(e) => setPhone(e.target.value.replace(/[^\d\s+-]/g, ''))}
-                placeholder="Enter 10-digit Indian Mobile Number (e.g. 98765 43210)"
-                maxLength={15}
-                className="w-full px-3.5 py-3 text-sm focus:outline-hidden"
+                onChange={(e) => setPhone(e.target.value.replace(/\D/g, '').slice(0, 10))}
+                placeholder="Enter 10-digit Mobile Number (e.g. 9876543210)"
+                maxLength={10}
+                className="w-full px-3.5 py-3 text-sm focus:outline-hidden font-mono"
               />
             </div>
 

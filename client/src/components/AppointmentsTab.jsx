@@ -455,10 +455,10 @@ export default function AppointmentsTab({ selectedDate, setSelectedDate }) {
                       type="tel"
                       required
                       value={walkInData.patientPhone}
-                      onChange={(e) => setWalkInData({ ...walkInData, patientPhone: e.target.value })}
-                      placeholder="98765 43210"
-                      maxLength={15}
-                      className="w-full px-2 py-2 text-sm focus:outline-hidden"
+                      onChange={(e) => setWalkInData({ ...walkInData, patientPhone: e.target.value.replace(/\D/g, '').slice(0, 10) })}
+                      placeholder="9876543210"
+                      maxLength={10}
+                      className="w-full px-2 py-2 text-sm focus:outline-hidden font-mono"
                     />
                   </div>
                 </div>

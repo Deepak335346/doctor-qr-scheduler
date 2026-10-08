@@ -382,13 +382,37 @@ app.post('/api/appointments', bookingLimiter, (req, res) => {
     timeSlot
   } = req.body;
 
-  if (!patientName || !patientPhone || !date || !timeSlot) {
-    return res.status(400).json({
-      error: 'Missing required fields: Patient Name, Mobile Number, Date, and Time Slot are required.'
-    });
+  // Mandatory fields check: Everything is required except email
+  if (!patientName?.trim()) {
+    return res.status(400).json({ error: 'Patient Full Name is mandatory.' });
   }
 
-  // Validate Indian Mobile Number
+  if (!patientPhone?.trim()) {
+    return res.status(400).json({ error: '10-digit Mobile Number is mandatory.' });
+  }
+
+  if (!date || !timeSlot) {
+    return res.status(400).json({ error: 'Appointment Date and Time Slot are mandatory.' });
+  }
+
+  const numAge = Number(age);
+  if (!age || isNaN(numAge) || numAge < 1 || numAge > 120) {
+    return res.status(400).json({ error: 'Patient Age is mandatory (must be between 1 and 120 years).' });
+  }
+
+  if (!gender || !gender.trim()) {
+    return res.status(400).json({ error: 'Patient Gender is mandatory.' });
+  }
+
+  if (!visitType || !visitType.trim()) {
+    return res.status(400).json({ error: 'Visit Type is mandatory.' });
+  }
+
+  if (!reason || !reason.trim()) {
+    return res.status(400).json({ error: 'Symptoms / Reason for visit is mandatory.' });
+  }
+
+  // Validate 10-digit Indian Mobile Number
   const phoneValidation = validateIndianPhone(patientPhone);
   if (!phoneValidation.isValid) {
     return res.status(400).json({
@@ -396,12 +420,15 @@ app.post('/api/appointments', bookingLimiter, (req, res) => {
     });
   }
 
-  // Validate Email Address (if provided)
-  const emailValidation = validateEmail(patientEmail);
-  if (!emailValidation.isValid) {
-    return res.status(400).json({
-      error: emailValidation.error || 'Please enter a valid email address.'
-    });
+  // Validate Email Address (Optional, but must satisfy standard email format if provided)
+  const trimmedEmail = (patientEmail || '').trim();
+  if (trimmedEmail.length > 0) {
+    const emailValidation = validateEmail(trimmedEmail, false);
+    if (!emailValidation.isValid) {
+      return res.status(400).json({
+        error: emailValidation.error || 'Please enter a valid email format (e.g. name@example.com).'
+      });
+    }
   }
 
   const db = getDb();

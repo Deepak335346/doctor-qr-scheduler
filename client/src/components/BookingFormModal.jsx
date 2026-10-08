@@ -16,18 +16,17 @@ export default function BookingFormModal({ slot, dateStr, doctor, onClose, onBoo
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // Validate Indian Phone format: 10 digits starting with 6, 7, 8, 9
-  const cleanPhoneDigits = formData.patientPhone.replace(/\D/g, '').slice(-10);
-  const isPhoneValid = cleanPhoneDigits.length === 10 && /^[6-9]/.test(cleanPhoneDigits);
+  // Phone must be strictly 10 numeric digits starting with 6, 7, 8, 9
+  const isPhoneValid = /^[6-9]\d{9}$/.test(formData.patientPhone);
 
-  // Validate Email (if provided)
-  const isEmailValid = !formData.patientEmail.trim() || 
-    /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(formData.patientEmail.trim());
+  // Email format validation (optional, but must be valid if entered)
+  const emailTrimmed = formData.patientEmail.trim();
+  const isEmailValid = !emailTrimmed || /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(emailTrimmed);
 
   const handlePhoneChange = (e) => {
-    // Only allow digits, spaces, plus, and hyphens
-    const val = e.target.value.replace(/[^\d\s+-]/g, '');
-    setFormData({ ...formData, patientPhone: val });
+    // Only allow numeric digits and restrict strictly to 10 numbers
+    const digitsOnly = e.target.value.replace(/\D/g, '').slice(0, 10);
+    setFormData({ ...formData, patientPhone: digitsOnly });
   };
 
   const handleSubmit = async (e) => {
@@ -36,18 +35,45 @@ export default function BookingFormModal({ slot, dateStr, doctor, onClose, onBoo
     setPhoneTouched(true);
     setEmailTouched(true);
 
+    // Everything is mandatory EXCEPT email
     if (!formData.patientName.trim()) {
-      setError('Please provide the patient name');
+      setError('Patient Full Name is mandatory.');
+      return;
+    }
+
+    if (!formData.patientPhone || formData.patientPhone.length !== 10) {
+      setError('Mobile number must be exactly 10 digits.');
       return;
     }
 
     if (!isPhoneValid) {
-      setError('Please enter a valid 10-digit Indian mobile number starting with 6, 7, 8, or 9');
+      setError('Please enter a valid 10-digit mobile number starting with 6, 7, 8, or 9.');
       return;
     }
 
-    if (!isEmailValid) {
-      setError('Please enter a valid email address (e.g. name@domain.com)');
+    if (!formData.age || Number(formData.age) < 1 || Number(formData.age) > 120) {
+      setError('Patient Age is mandatory (must be between 1 and 120 years).');
+      return;
+    }
+
+    if (!formData.gender) {
+      setError('Patient Gender is mandatory.');
+      return;
+    }
+
+    if (!formData.visitType) {
+      setError('Visit Type is mandatory.');
+      return;
+    }
+
+    if (!formData.reason.trim()) {
+      setError('Symptoms / Reason for visit is mandatory.');
+      return;
+    }
+
+    // Email is optional, but if entered, must satisfy standard email format
+    if (emailTrimmed && !isEmailValid) {
+      setError('Please enter a valid email address format (e.g. name@example.com).');
       return;
     }
 
@@ -59,6 +85,11 @@ export default function BookingFormModal({ slot, dateStr, doctor, onClose, onBoo
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...formData,
+          patientName: formData.patientName.trim(),
+          patientPhone: formData.patientPhone.trim(),
+          patientEmail: emailTrimmed,
+          age: Number(formData.age),
+          reason: formData.reason.trim(),
           date: dateStr,
           timeSlot: slot.time
         })
@@ -120,7 +151,7 @@ export default function BookingFormModal({ slot, dateStr, doctor, onClose, onBoo
             </div>
           )}
 
-          {/* Patient Name */}
+          {/* Patient Name - Mandatory */}
           <div>
             <label className="block text-xs font-semibold text-slate-700 mb-1">
               Patient Full Name <span className="text-red-500">*</span>
@@ -133,16 +164,17 @@ export default function BookingFormModal({ slot, dateStr, doctor, onClose, onBoo
                 value={formData.patientName}
                 onChange={(e) => setFormData({ ...formData, patientName: e.target.value })}
                 placeholder="e.g. Rahul Sharma"
-                className="w-full pl-10 pr-3 py-2 text-sm rounded-xl border border-slate-300 focus:outline-hidden focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-all"
+                className="w-full pl-10 pr-3 py-2 text-sm rounded-xl border border-slate-300 focus:outline-hidden focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-all font-medium"
               />
             </div>
           </div>
 
-          {/* Indian Mobile Number & Email */}
+          {/* 10-Digit Mobile Number & Optional Email */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-semibold text-slate-700 mb-1">
-                Indian Mobile Number <span className="text-red-500">*</span>
+                Mobile Number <span className="text-red-500">*</span>
+                <span className="text-[10px] text-slate-400 font-normal ml-1">(10 digits only)</span>
               </label>
               <div className="relative flex rounded-xl border border-slate-300 focus-within:ring-2 focus-within:ring-teal-500 focus-within:border-teal-500 overflow-hidden">
                 <span className="inline-flex items-center px-2.5 bg-slate-50 border-r border-slate-200 text-xs font-bold text-slate-700 gap-1 select-none">
@@ -155,22 +187,22 @@ export default function BookingFormModal({ slot, dateStr, doctor, onClose, onBoo
                   value={formData.patientPhone}
                   onChange={handlePhoneChange}
                   onBlur={() => setPhoneTouched(true)}
-                  placeholder="98765 43210"
-                  maxLength={15}
-                  className="w-full px-3 py-2 text-sm focus:outline-hidden"
+                  placeholder="9876543210"
+                  maxLength={10}
+                  className="w-full px-3 py-2 text-sm focus:outline-hidden font-mono font-medium tracking-wide"
                 />
               </div>
-              {phoneTouched && !isPhoneValid && (
+              {phoneTouched && (!formData.patientPhone || formData.patientPhone.length !== 10 || !isPhoneValid) && (
                 <p className="text-[11px] text-red-600 mt-1 flex items-center gap-1">
-                  <AlertCircle className="w-3 h-3" />
-                  Must be 10 digits starting with 6, 7, 8, or 9
+                  <AlertCircle className="w-3 h-3 shrink-0" />
+                  <span>Must be exactly 10 digits starting with 6-9</span>
                 </p>
               )}
             </div>
 
             <div>
               <label className="block text-xs font-semibold text-slate-700 mb-1">
-                Email Address <span className="text-slate-400">(Optional)</span>
+                Email Address <span className="text-slate-400 font-normal">(Optional)</span>
               </label>
               <div className="relative">
                 <Mail className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
@@ -179,39 +211,46 @@ export default function BookingFormModal({ slot, dateStr, doctor, onClose, onBoo
                   value={formData.patientEmail}
                   onChange={(e) => setFormData({ ...formData, patientEmail: e.target.value })}
                   onBlur={() => setEmailTouched(true)}
-                  placeholder="name@example.in"
+                  placeholder="name@example.com"
                   className="w-full pl-10 pr-3 py-2 text-sm rounded-xl border border-slate-300 focus:outline-hidden focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-all"
                 />
               </div>
-              {emailTouched && !isEmailValid && (
-                <p className="text-[11px] text-red-600 mt-1">
-                  Please enter a valid email format
+              {emailTouched && emailTrimmed && !isEmailValid && (
+                <p className="text-[11px] text-red-600 mt-1 flex items-center gap-1">
+                  <AlertCircle className="w-3 h-3 shrink-0" />
+                  <span>Please enter a valid email format</span>
                 </p>
               )}
             </div>
           </div>
 
-          {/* Age & Gender & Visit Type */}
+          {/* Age (Mandatory) & Gender (Mandatory) & Visit Type (Mandatory) */}
           <div className="grid grid-cols-3 gap-2">
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">Age</label>
+              <label className="block text-xs font-semibold text-slate-700 mb-1">
+                Age <span className="text-red-500">*</span>
+              </label>
               <input
                 type="number"
+                required
                 min="1"
                 max="120"
                 value={formData.age}
                 onChange={(e) => setFormData({ ...formData, age: e.target.value })}
-                placeholder="Yrs"
-                className="w-full px-3 py-2 text-sm rounded-xl border border-slate-300 focus:outline-hidden focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+                placeholder="Years"
+                className="w-full px-3 py-2 text-sm rounded-xl border border-slate-300 focus:outline-hidden focus:ring-2 focus:ring-teal-500 focus:border-teal-500 font-medium"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">Gender</label>
+              <label className="block text-xs font-semibold text-slate-700 mb-1">
+                Gender <span className="text-red-500">*</span>
+              </label>
               <select
+                required
                 value={formData.gender}
                 onChange={(e) => setFormData({ ...formData, gender: e.target.value })}
-                className="w-full px-2 py-2 text-sm rounded-xl border border-slate-300 focus:outline-hidden focus:ring-2 focus:ring-teal-500 focus:border-teal-500 bg-white"
+                className="w-full px-2 py-2 text-sm rounded-xl border border-slate-300 focus:outline-hidden focus:ring-2 focus:ring-teal-500 focus:border-teal-500 bg-white font-medium"
               >
                 <option value="Male">Male</option>
                 <option value="Female">Female</option>
@@ -220,11 +259,14 @@ export default function BookingFormModal({ slot, dateStr, doctor, onClose, onBoo
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">Visit Type</label>
+              <label className="block text-xs font-semibold text-slate-700 mb-1">
+                Visit Type <span className="text-red-500">*</span>
+              </label>
               <select
+                required
                 value={formData.visitType}
                 onChange={(e) => setFormData({ ...formData, visitType: e.target.value })}
-                className="w-full px-2 py-2 text-sm rounded-xl border border-slate-300 focus:outline-hidden focus:ring-2 focus:ring-teal-500 focus:border-teal-500 bg-white"
+                className="w-full px-2 py-2 text-sm rounded-xl border border-slate-300 focus:outline-hidden focus:ring-2 focus:ring-teal-500 focus:border-teal-500 bg-white font-medium"
               >
                 <option value="First Visit">First Visit</option>
                 <option value="Follow-up">Follow-up</option>
@@ -233,27 +275,28 @@ export default function BookingFormModal({ slot, dateStr, doctor, onClose, onBoo
             </div>
           </div>
 
-          {/* Symptoms / Chief Complaint */}
+          {/* Symptoms / Chief Complaint - Mandatory */}
           <div>
             <label className="block text-xs font-semibold text-slate-700 mb-1">
-              Symptoms / Chief Complaint
+              Symptoms / Reason for Visit <span className="text-red-500">*</span>
             </label>
             <div className="relative">
               <textarea
+                required
                 rows={2}
                 value={formData.reason}
                 onChange={(e) => setFormData({ ...formData, reason: e.target.value })}
                 placeholder="e.g. Mild fever, dry cough for 2 days, seasonal allergy..."
-                className="w-full p-3 text-sm rounded-xl border border-slate-300 focus:outline-hidden focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-all resize-none"
+                className="w-full p-3 text-sm rounded-xl border border-slate-300 focus:outline-hidden focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-all resize-none font-medium"
               ></textarea>
             </div>
           </div>
 
-          {/* Indian Medical Notice & Fee in Rupees */}
+          {/* Fee & Emergency Notice */}
           <div className="flex items-start gap-2 text-[11px] text-slate-500 pt-1">
             <ShieldAlert className="w-4 h-4 text-slate-400 shrink-0" />
             <span>
-              Consultation fee is payable at the clinic counter (<strong>{doctor?.consultationFee || '₹500 / Consultation'}</strong>). In case of acute medical emergencies, please visit the emergency hospital immediately.
+              Consultation fee is payable at the clinic counter (<strong>{doctor?.consultationFee || '₹500 / Consultation'}</strong>).
             </span>
           </div>
 
