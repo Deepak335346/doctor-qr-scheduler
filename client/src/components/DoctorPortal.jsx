@@ -13,17 +13,26 @@ export default function DoctorPortal({ doctor, onUpdateDoctor, onLogout }) {
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
       {/* Top Welcome & Administration Banner */}
       <div className="bg-gradient-to-r from-slate-900 via-slate-800 to-teal-950 text-white rounded-3xl p-6 sm:p-8 shadow-sm border border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-2 text-teal-400 text-xs font-bold uppercase tracking-wider mb-1">
-            <ShieldCheck className="w-4 h-4 text-teal-400" />
-            <span>Doctor Administration Session Active</span>
+        <div className="flex items-center gap-4">
+          <div className="relative shrink-0">
+            <img
+              src={doctor?.avatar || "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&q=80&w=350"}
+              alt={doctor?.name}
+              className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl object-cover ring-2 ring-teal-400/40 shadow-md bg-slate-800"
+            />
           </div>
-          <h1 className="text-2xl sm:text-3xl font-black tracking-tight">
-            {doctor?.name || 'Doctor Portal'}
-          </h1>
-          <p className="text-slate-400 text-xs sm:text-sm mt-1">
-            {doctor?.chamber} • {doctor?.clinicName}
-          </p>
+          <div>
+            <div className="flex items-center gap-2 text-teal-400 text-xs font-bold uppercase tracking-wider mb-1">
+              <ShieldCheck className="w-4 h-4 text-teal-400" />
+              <span>Doctor Administration Session Active</span>
+            </div>
+            <h1 className="text-2xl sm:text-3xl font-black tracking-tight">
+              {doctor?.name || 'Doctor Portal'}
+            </h1>
+            <p className="text-slate-400 text-xs sm:text-sm mt-1">
+              {doctor?.chamber} • {doctor?.clinicName}
+            </p>
+          </div>
         </div>
 
         <div className="flex flex-wrap items-center gap-3">

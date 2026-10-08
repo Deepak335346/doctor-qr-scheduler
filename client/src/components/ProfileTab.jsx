@@ -1,11 +1,14 @@
-import React, { useState } from 'react';
-import { Check, KeyRound, Lock, AlertCircle, ShieldCheck } from 'lucide-react';
+import React, { useState, useRef } from 'react';
+import { Check, KeyRound, Lock, AlertCircle, ShieldCheck, Upload, Camera, RotateCcw, ImageIcon } from 'lucide-react';
 import { authFetch } from '../utils/api.js';
 
 export default function ProfileTab({ doctor, onUpdateDoctor }) {
   const [formData, setFormData] = useState({ ...doctor });
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [uploadNotice, setUploadNotice] = useState(null);
+  const [showUrlInput, setShowUrlInput] = useState(false);
+  const fileInputRef = useRef(null);
 
   // Security Credentials State
   const [credData, setCredData] = useState({
@@ -41,6 +44,60 @@ export default function ProfileTab({ doctor, onUpdateDoctor }) {
     } finally {
       setSaving(false);
     }
+  };
+
+  const handleDeviceImageUpload = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      alert('Please choose an image file (JPEG, PNG, or WebP).');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const img = new Image();
+      img.onload = () => {
+        // Optimize and resize image in browser to max 500x500
+        const canvas = document.createElement('canvas');
+        const maxDim = 500;
+        let width = img.width;
+        let height = img.height;
+
+        if (width > height) {
+          if (width > maxDim) {
+            height = Math.round((height * maxDim) / width);
+            width = maxDim;
+          }
+        } else {
+          if (height > maxDim) {
+            width = Math.round((width * maxDim) / height);
+            height = maxDim;
+          }
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+
+        // Compress to high quality JPEG data URL (~40-60KB)
+        const optimizedDataUrl = canvas.toDataURL('image/jpeg', 0.85);
+        setFormData(prev => ({ ...prev, avatar: optimizedDataUrl }));
+        setUploadNotice('Photo uploaded from device! Click "Save Profile Changes" below to apply.');
+      };
+      img.src = event.target.result;
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleResetPhoto = () => {
+    setFormData(prev => ({
+      ...prev,
+      avatar: "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&q=80&w=350"
+    }));
+    setUploadNotice('Reset to default doctor photo. Click "Save Profile Changes" below to apply.');
   };
 
   const handleCredentialsSubmit = async (e) => {
@@ -237,15 +294,99 @@ export default function ProfileTab({ doctor, onUpdateDoctor }) {
             </div>
           </div>
 
-          {/* Profile Image URL */}
-          <div>
-            <label className="block font-semibold text-slate-700 mb-1">Avatar / Photo URL</label>
-            <input
-              type="url"
-              value={formData.avatar || ''}
-              onChange={(e) => setFormData({ ...formData, avatar: e.target.value })}
-              className="w-full px-3 py-2 rounded-xl border border-slate-300 text-sm focus:outline-hidden focus:ring-2 focus:ring-teal-500"
-            />
+          {/* Doctor Profile Photo Upload from Device */}
+          <div className="bg-slate-50 border border-slate-200/90 rounded-2xl p-4 sm:p-5 space-y-3">
+            <div className="flex items-center justify-between">
+              <div>
+                <label className="block text-xs font-bold text-slate-800">Doctor Profile Photo</label>
+                <p className="text-[11px] text-slate-500">This photo appears on your patient booking page, header, and clinic QR posters.</p>
+              </div>
+            </div>
+
+            <div className="flex flex-col sm:flex-row sm:items-center gap-4 pt-1">
+              {/* Photo Preview */}
+              <div className="relative group shrink-0 w-24 h-24 sm:w-28 sm:h-28 rounded-2xl overflow-hidden ring-4 ring-white shadow-md bg-white border border-slate-200">
+                <img
+                  src={formData.avatar || "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&q=80&w=350"}
+                  alt="Doctor Preview"
+                  className="w-full h-full object-cover"
+                />
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="absolute inset-0 bg-slate-900/50 text-white flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer text-[10px] font-bold"
+                  title="Click to choose a photo from device"
+                >
+                  <Camera className="w-5 h-5 mb-1 text-teal-300" />
+                  <span>Change Photo</span>
+                </button>
+              </div>
+
+              {/* Upload Controls & Actions */}
+              <div className="space-y-2 flex-1">
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/png, image/jpeg, image/jpg, image/webp"
+                  onChange={handleDeviceImageUpload}
+                  className="hidden"
+                />
+
+                <div className="flex flex-wrap items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-bold text-xs transition-all shadow-sm cursor-pointer"
+                  >
+                    <Upload className="w-3.5 h-3.5" />
+                    <span>Choose Photo from Device</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={handleResetPhoto}
+                    className="inline-flex items-center gap-1 px-3 py-2 rounded-xl bg-white border border-slate-200 hover:bg-slate-100 text-slate-600 font-semibold text-xs transition-all cursor-pointer"
+                    title="Reset to default placeholder image"
+                  >
+                    <RotateCcw className="w-3 h-3" />
+                    <span>Reset Default</span>
+                  </button>
+                </div>
+
+                <p className="text-[11px] text-slate-500">
+                  Select any photo from your phone or PC (JPG, PNG, WebP). It is automatically resized and optimized.
+                </p>
+
+                {uploadNotice && (
+                  <p className="text-[11px] text-emerald-700 font-semibold flex items-center gap-1 bg-emerald-50 border border-emerald-200 p-2 rounded-lg">
+                    <Check className="w-3.5 h-3.5 shrink-0" />
+                    <span>{uploadNotice}</span>
+                  </p>
+                )}
+
+                {/* Optional Web URL Toggle */}
+                <div className="pt-1">
+                  <button
+                    type="button"
+                    onClick={() => setShowUrlInput(!showUrlInput)}
+                    className="text-[11px] text-teal-700 hover:text-teal-900 font-semibold inline-flex items-center gap-1 cursor-pointer"
+                  >
+                    <ImageIcon className="w-3 h-3" />
+                    <span>{showUrlInput ? 'Hide Web URL Option' : 'Or paste an Image Web URL instead'}</span>
+                  </button>
+
+                  {showUrlInput && (
+                    <input
+                      type="url"
+                      value={formData.avatar || ''}
+                      onChange={(e) => setFormData({ ...formData, avatar: e.target.value })}
+                      placeholder="https://example.com/doctor-photo.jpg"
+                      className="w-full mt-1.5 px-3 py-2 rounded-xl border border-slate-300 text-xs focus:outline-hidden focus:ring-2 focus:ring-teal-500 font-mono"
+                    />
+                  )}
+                </div>
+              </div>
+            </div>
           </div>
 
           {/* Bio */}
