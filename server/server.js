@@ -235,7 +235,7 @@ app.post('/api/auth/doctor/login', loginLimiter, (req, res) => {
 
   if (!isAuthenticated) {
     return res.status(401).json({
-      error: 'Invalid credentials. Please enter the correct Doctor PIN or Username & Password.'
+      error: 'Invalid credentials. Please enter the correct username and password.'
     });
   }
 

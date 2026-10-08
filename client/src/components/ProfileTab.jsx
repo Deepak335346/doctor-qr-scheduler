@@ -279,7 +279,7 @@ export default function ProfileTab({ doctor, onUpdateDoctor }) {
           </div>
           <div>
             <h2 className="text-base font-bold text-slate-900">Security & Login Credentials</h2>
-            <p className="text-xs text-slate-500">Change your Doctor Security PIN or Username & Password used to access this portal.</p>
+            <p className="text-xs text-slate-500">Change your Username & Password used to access this portal.</p>
           </div>
         </div>
 
@@ -298,25 +298,25 @@ export default function ProfileTab({ doctor, onUpdateDoctor }) {
         )}
 
         <form onSubmit={handleCredentialsSubmit} className="space-y-4 text-xs">
-          {/* Current Password / PIN Required */}
+          {/* Current Password Required */}
           <div>
             <label className="block font-bold text-slate-800 mb-1">
-              Current PIN or Password <span className="text-red-500">*</span>
+              Current Password <span className="text-red-500">*</span>
             </label>
             <input
               type="password"
               required
               value={credData.currentPasswordOrPin}
               onChange={(e) => setCredData({ ...credData, currentPasswordOrPin: e.target.value })}
-              placeholder="Enter your current PIN or Password to authorize changes"
+              placeholder="Enter your current password to authorize changes"
               className="w-full px-3 py-2 rounded-xl border border-slate-300 text-sm focus:outline-hidden focus:ring-2 focus:ring-indigo-500"
             />
             <p className="text-[11px] text-slate-400 mt-1">
-              Default PIN is <code className="bg-slate-100 px-1 py-0.5 rounded">782104</code> or Password <code className="bg-slate-100 px-1 py-0.5 rounded">Doctor@2026</code>.
+              Enter your current password to authorize security updates.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 border-t border-slate-100">
+          <div className="pt-2 border-t border-slate-100">
             {/* New Username */}
             <div>
               <label className="block font-semibold text-slate-700 mb-1">New Username (Optional)</label>
@@ -324,23 +324,9 @@ export default function ProfileTab({ doctor, onUpdateDoctor }) {
                 type="text"
                 value={credData.newUsername}
                 onChange={(e) => setCredData({ ...credData, newUsername: e.target.value })}
-                placeholder="Leave blank to keep current"
+                placeholder="Leave blank to keep current username"
                 className="w-full px-3 py-2 rounded-xl border border-slate-300 text-sm focus:outline-hidden focus:ring-2 focus:ring-indigo-500"
               />
-            </div>
-
-            {/* New Quick PIN */}
-            <div>
-              <label className="block font-semibold text-slate-700 mb-1">New Doctor PIN (4 to 8 Digits)</label>
-              <input
-                type="text"
-                maxLength={8}
-                value={credData.newPin}
-                onChange={(e) => setCredData({ ...credData, newPin: e.target.value.replace(/\D/g, '') })}
-                placeholder="e.g. 849201"
-                className="w-full px-3 py-2 rounded-xl border border-slate-300 text-sm font-mono tracking-widest focus:outline-hidden focus:ring-2 focus:ring-indigo-500"
-              />
-              <p className="text-[11px] text-slate-400 mt-1">Quick login PIN for tablet and smartphone.</p>
             </div>
           </div>
 
