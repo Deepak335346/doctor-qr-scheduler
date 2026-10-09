@@ -7,7 +7,7 @@ import qrcode from 'qrcode';
 import os from 'os';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { getDb, saveDb } from './db.js';
+import { getDb, saveDb, connectCloudDb } from './db.js';
 import { validateIndianPhone, validateEmail, sanitizeText } from './utils/validators.js';
 import { requireDoctorAuth, generateDoctorToken } from './middleware/auth.js';
 
@@ -870,6 +870,9 @@ app.use((req, res) => {
     }
   });
 });
+
+// Connect to persistent Cloud MongoDB if MONGODB_URI is provided
+await connectCloudDb();
 
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`\n======================================================`);

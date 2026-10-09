@@ -1,6 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import mongoose from 'mongoose';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -166,14 +167,28 @@ const defaultData = {
     updatedAt: new Date().toISOString()
   }
 };
+// Mongoose Schema for persistent cloud database storage (MongoDB Atlas)
+const clinicSchema = new mongoose.Schema({
+  _id: { type: String, default: 'clinic_primary' },
+  doctor: { type: mongoose.Schema.Types.Mixed },
+  scheduleConfig: { type: mongoose.Schema.Types.Mixed },
+  overrides: { type: Array, default: [] },
+  appointments: { type: Array, default: [] },
+  credentials: { type: mongoose.Schema.Types.Mixed },
+  updatedAt: { type: Date, default: Date.now }
+}, { collection: 'clinic_data', minimize: false });
 
-// Ensure data directory exists
+const ClinicModel = mongoose.models.ClinicData || mongoose.model('ClinicData', clinicSchema);
+
+let cachedDb = null;
+let isCloudConnected = false;
+
+// Ensure local data directory exists
 if (!fs.existsSync(path.dirname(DATA_FILE))) {
   fs.mkdirSync(path.dirname(DATA_FILE), { recursive: true });
 }
 
-// Load database
-export function getDb() {
+function readLocalDb() {
   try {
     if (!fs.existsSync(DATA_FILE)) {
       fs.writeFileSync(DATA_FILE, JSON.stringify(defaultData, null, 2), 'utf-8');
@@ -182,20 +197,75 @@ export function getDb() {
     const content = fs.readFileSync(DATA_FILE, 'utf-8');
     return JSON.parse(content);
   } catch (err) {
-    console.error("Error reading database file, using fallback:", err);
+    console.error("Error reading local database file, using fallback:", err);
     return defaultData;
   }
 }
 
-// Save database
-export function saveDb(data) {
-  try {
-    fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2), 'utf-8');
-    return true;
-  } catch (err) {
-    console.error("Error writing database file:", err);
+// Connect to Cloud Database (MongoDB Atlas) for production persistence
+export async function connectCloudDb() {
+  const uri = process.env.MONGODB_URI;
+  if (!uri) {
+    console.log('📦 Database Mode: Local JSON File (server/data/clinic_data.json)');
+    console.log('💡 Note: Set MONGODB_URI in production for zero-data-loss cloud persistence across deployments.');
     return false;
   }
+
+  try {
+    console.log('🔄 Connecting to Cloud MongoDB Atlas...');
+    await mongoose.connect(uri, { serverSelectionTimeoutMS: 5000 });
+    isCloudConnected = true;
+    console.log('☁️  Connected to Cloud MongoDB Atlas successfully!');
+
+    // Check if cloud document exists; if not, migrate local data
+    const cloudDoc = await ClinicModel.findById('clinic_primary');
+    if (!cloudDoc) {
+      console.log('🌱 First-time cloud setup: Migrating local clinic records to MongoDB Atlas...');
+      const localData = readLocalDb();
+      await ClinicModel.create({ _id: 'clinic_primary', ...localData });
+      cachedDb = localData;
+    } else {
+      cachedDb = cloudDoc.toObject();
+      // Mirror to local disk for offline caching
+      try {
+        fs.writeFileSync(DATA_FILE, JSON.stringify(cachedDb, null, 2), 'utf-8');
+      } catch (e) {}
+      console.log('✅ Loaded persistent clinic records from Cloud MongoDB.');
+    }
+    return true;
+  } catch (err) {
+    console.error('⚠️  Cloud MongoDB connection failed:', err.message);
+    console.log('↪️  Falling back to local file storage (server/data/clinic_data.json)');
+    isCloudConnected = false;
+    return false;
+  }
+}
+
+// Load database (cached in-memory for instant read performance)
+export function getDb() {
+  if (cachedDb) return cachedDb;
+  cachedDb = readLocalDb();
+  return cachedDb;
+}
+
+// Save database (persists to local file and syncs to MongoDB Atlas if connected)
+export function saveDb(data) {
+  cachedDb = data;
+  try {
+    fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2), 'utf-8');
+  } catch (err) {
+    console.error("Error writing local database file:", err);
+  }
+
+  // If connected to Cloud MongoDB, sync asynchronously
+  if (isCloudConnected && mongoose.connection.readyState === 1) {
+    ClinicModel.findByIdAndUpdate(
+      'clinic_primary',
+      { ...data, updatedAt: new Date() },
+      { upsert: true }
+    ).catch(err => console.error('Cloud MongoDB sync error:', err.message));
+  }
+  return true;
 }
 
 // Initialize or update data file with Indian localization & credentials

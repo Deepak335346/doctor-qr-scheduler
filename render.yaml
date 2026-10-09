@@ -18,3 +18,5 @@ services:
         value: Doctor@2026
       - key: DOCTOR_PIN
         value: "782104"
+      - key: MONGODB_URI
+        sync: false
